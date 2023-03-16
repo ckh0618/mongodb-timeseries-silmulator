@@ -49,4 +49,19 @@ Usage of ./timeseries_osx:
 * metric-count : metric 의 갯수 
 * sensor : 센서수. 각 센서는 1초당 하나의 이벤트를 생성 
 
-소스 
+
+## Helper Shell 
+```
+BINNAME="./timeseries_linux_amd64"
+
+NUM_OF_SOURCES="8192 16384 32768"
+
+
+for n in $NUM_OF_SOURCES
+do :
+   echo $n
+   ${BINNAME} -iteration 900 -bulk 60 -collection timeseries_${n}_1 -concurrency ${n}
+   echo "Sleep....."
+   sleep 60
+done
+```
