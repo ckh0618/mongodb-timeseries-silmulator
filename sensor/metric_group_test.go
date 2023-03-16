@@ -1,4 +1,4 @@
-package server
+package sensor
 
 import (
 	"context"
@@ -14,8 +14,8 @@ func TestName(t *testing.T) {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 
 	assert.NoError(t, err)
-	mongoHandler := NewMongoHandler(client, "timesereis", "timeseries_data")
-	group := NewMetricGroup(time.Now(), 3, 1, 10, 10)
+	mongoHandler := NewMongoHandler(client, "ts", "ts")
+	group := NewMetricGroup(time.Now(), 3, 1, 10, 10, true)
 	group.SubscribeData(context.Background(), mongoHandler.DoInsert)
 	group.ProduceData(context.Background(), 100)
 

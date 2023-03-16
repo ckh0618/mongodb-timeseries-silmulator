@@ -1,4 +1,4 @@
-package server
+package sensor
 
 import (
 	"fmt"
@@ -17,11 +17,22 @@ func TestGenArbitraryMetric(t *testing.T) {
 	fmt.Println(d)
 }
 
+func TestGenNestedDocument(t *testing.T) {
+
+	m := map[string]string{
+		"resourceId":   "serverId_0",
+		"definitionId": "sensor.Filesystem_usage",
+	}
+
+	d := GenNestedDocument(m, 2, time.Now())
+	fmt.Println(d)
+}
+
 func TestGenArbitraryMetricWithMap(t *testing.T) {
 
 	m := map[string]string{
 		"resourceId":   "serverId_0",
-		"definitionId": "server.Filesystem_usage",
+		"definitionId": "sensor.Filesystem_usage",
 	}
 
 	d := GenArbitraryMetricWithMap(m, 4, time.Now())

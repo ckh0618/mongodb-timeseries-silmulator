@@ -1,9 +1,8 @@
-package server
+package sensor
 
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -21,7 +20,7 @@ func NewMongoHandler(client *mongo.Client, database string, collection string) *
 	return &MongoHandler{client: client, database: database, coll: coll, collection: collection}
 }
 
-func (m MongoHandler) DoInsert(ctx context.Context, chanData chan *bson.D, nBulk int) {
+func (m MongoHandler) DoInsert(ctx context.Context, chanData chan any, nBulk int) {
 
 	i := 0
 	var arrData []any

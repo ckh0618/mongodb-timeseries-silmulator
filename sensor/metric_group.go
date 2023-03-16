@@ -1,9 +1,8 @@
-package server
+package sensor
 
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"math/rand"
 	"sync"
 	"time"
@@ -41,24 +40,33 @@ type MetricGroup struct {
 	nMetrics      int
 	nBulk         int
 
-	metrics  []*Metric
-	channels []chan *bson.D
+	metrics []*Metric
+
+	channels []chan any
 
 	wgProduce  *sync.WaitGroup
 	wgConsumer *sync.WaitGroup
+
+	nNested bool
 }
 
-func NewMetricGroup(startTime time.Time, nMetaFields int, nMetricFields int, nMetrics int, nBulk int) *MetricGroup {
+func NewMetricGroup(startTime time.Time, nMetaFields int, nMetricFields int, nMetrics int, nBulk int, nNested bool) *MetricGroup {
 	var metrics []*Metric
-	var channels []chan *bson.D
+	var channels []chan any
 
 	for i := 0; i < nMetrics; i++ {
 		meta := buildMetaFields(nMetaFields)
-		c := make(chan *bson.D, MaxMetricBuffer)
+		c := make(chan any, MaxMetricBuffer)
 		channels = append(channels, c)
 
-		p := NewMetricProducer(meta, nMetricFields, startTime, time.Second, c)
-		metrics = append(metrics, p)
+		if nNested {
+			p := NewMetricProducer(meta, nMetricFields, startTime, time.Second, c, MappingFunctionNestedObject)
+			metrics = append(metrics, p)
+		} else {
+			p := NewMetricProducer(meta, nMetricFields, startTime, time.Second, c, MappingFunctionArbitrary)
+			metrics = append(metrics, p)
+		}
+
 	}
 
 	return &MetricGroup{
@@ -71,6 +79,7 @@ func NewMetricGroup(startTime time.Time, nMetaFields int, nMetricFields int, nMe
 		nBulk:         nBulk,
 		wgConsumer:    new(sync.WaitGroup),
 		wgProduce:     new(sync.WaitGroup),
+		nNested:       nNested,
 	}
 }
 
@@ -87,7 +96,7 @@ func (g MetricGroup) ProduceData(ctx context.Context, count int) error {
 	return nil
 }
 
-func (g MetricGroup) SubscribeData(ctx context.Context, f func(ctx2 context.Context, dataChan chan *bson.D, nBulk int)) error {
+func (g MetricGroup) SubscribeData(ctx context.Context, f func(ctx2 context.Context, dataChan chan any, nBulk int)) error {
 
 	for i := 0; i < g.nMetrics; i++ {
 		g.wgConsumer.Add(1)

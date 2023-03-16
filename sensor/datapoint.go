@@ -1,4 +1,4 @@
-package server
+package sensor
 
 import (
 	"fmt"
@@ -16,7 +16,61 @@ type DataPoint struct {
 const metaFieldNamePrefix = "MetaField%d"
 const metricFieldNamePrefix = "metrics%d"
 
-func GenArbitraryMetricWithMap(mataFieldMap map[string]string, numOfMetrics int, t time.Time) *bson.D {
+type metricType float32
+type SubMetric struct {
+	Metric01 metricType
+	Metric02 metricType
+	Metric03 metricType
+	Metric04 metricType
+	Metric05 metricType
+	Metric06 metricType
+	Metric07 metricType
+	Metric08 metricType
+	Metric09 metricType
+	Metric10 metricType
+}
+
+type NestedDataPoint struct {
+	Ts        time.Time
+	MetaField map[string]string
+	Metric1   SubMetric
+	Metric2   SubMetric
+	Metric3   SubMetric
+	Metric4   SubMetric
+	Metric5   SubMetric
+}
+
+var MappingFunctionArbitrary = GenArbitraryMetricWithMap
+var MappingFunctionNestedObject = GenNestedDocument
+
+func GenNestedDocument(mataFieldMap map[string]string, numOfMetrics int, t time.Time) any {
+
+	subMetric := SubMetric{
+		Metric01: metricType(rand.Float32()),
+		Metric02: metricType(rand.Float32()),
+		Metric03: metricType(rand.Float32()),
+		Metric04: metricType(rand.Float32()),
+		Metric05: metricType(rand.Float32()),
+		Metric06: metricType(rand.Float32()),
+		Metric07: metricType(rand.Float32()),
+		Metric08: metricType(rand.Float32()),
+		Metric09: metricType(rand.Float32()),
+		Metric10: metricType(rand.Float32()),
+	}
+	d := NestedDataPoint{
+		Ts:        t.Truncate(time.Second),
+		MetaField: mataFieldMap,
+		Metric1:   subMetric,
+		Metric2:   subMetric,
+		Metric3:   subMetric,
+		Metric4:   subMetric,
+		Metric5:   subMetric,
+	}
+
+	return &d
+}
+
+func GenArbitraryMetricWithMap(mataFieldMap map[string]string, numOfMetrics int, t time.Time) any {
 
 	d := bson.D{
 		{

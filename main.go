@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"time"
-	"timeseries_test/server"
+	"timeseries_test/sensor"
 )
 
 func main() {
@@ -22,6 +22,7 @@ func main() {
 	nSensors := flag.Int("sensor", 10, "# of sensors")
 	nCount := flag.Int("iteration", 1000, "number of test set ")
 	nBulk := flag.Int("bulk", 10, "number of batch count")
+	nNested := flag.Bool("isNested", false, "true if testing with nested objects")
 
 	flag.Parse()
 
@@ -44,9 +45,9 @@ func main() {
 		fmt.Println(err)
 	}
 
-	mongoHandler := server.NewMongoHandler(client, *databaseName, *collectionName)
+	mongoHandler := sensor.NewMongoHandler(client, *databaseName, *collectionName)
 
-	group := server.NewMetricGroup(time.Now(), *nMetaField, *nMetricField, *nSensors, *nBulk)
+	group := sensor.NewMetricGroup(time.Now(), *nMetaField, *nMetricField, *nSensors, *nBulk, *nNested)
 	group.SubscribeData(context.Background(), mongoHandler.DoInsert)
 	group.ProduceData(context.Background(), *nCount)
 

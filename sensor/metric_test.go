@@ -1,16 +1,15 @@
-package server
+package sensor
 
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"testing"
 	"time"
 )
 
 func TestMetricProducer_Produce(t *testing.T) {
 
-	c := make(chan *bson.D, MaxMetricBuffer)
+	c := make(chan any, MaxMetricBuffer)
 
 	go func() {
 
@@ -26,11 +25,11 @@ func TestMetricProducer_Produce(t *testing.T) {
 	}
 
 	go func() {
-		producer := NewMetricProducer(m, 3, time.Now(), time.Second, c)
+		producer := NewMetricProducer(m, 3, time.Now(), time.Second, c, MappingFunctionNestedObject)
 		producer.Produce(context.Background(), 1000)
 	}()
 
-	producer := NewMetricProducer(m, 6, time.Now(), time.Second, c)
+	producer := NewMetricProducer(m, 6, time.Now(), time.Second, c, MappingFunctionNestedObject)
 	producer.Produce(context.Background(), 1000)
 
 }
